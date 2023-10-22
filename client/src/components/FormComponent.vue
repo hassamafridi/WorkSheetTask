@@ -1,9 +1,20 @@
 <template>
   <div>
-    <button class="button add" @click="showAddInput = true" v-if="!showAddInput">Add Option</button>
-    <div v-if="showAddInput" class="container">
-      <input type="text" v-model="newOption" v-on:keyup.enter="addOption" placeholder="Enter option" />
-      <!-- <button class="button" >Add</button> -->
+    <button
+      class="button add"
+      @click="showAddInput = true"
+      v-if="!showAddInput && !firstInputDisplayed"
+    >
+      Add Option
+    </button>
+    <div v-if="showAddInput || firstInputDisplayed" class="container">
+      <input
+        type="text"
+        v-model="newOption"
+        v-on:keyup.enter="addOption"
+        placeholder="Enter option"
+      />
+      <button class="button" @click="addOption">Add</button>
     </div>
     <div v-for="(option, index) in options" :key="index">
       <span class="container">
@@ -32,12 +43,21 @@
 import { mapMutations } from "vuex"
 
 export default {
+  props: ["option"],
   data() {
     return {
       showAddInput: false,
       newOption: "",
       options: [],
+      firstInputDisplayed: false,
     }
+  },
+  watch: {
+    option(val) {
+      if (val) {
+        this.options = val
+      }
+    },
   },
   methods: {
     ...mapMutations(["addOption", "removeOption"]),
@@ -47,8 +67,13 @@ export default {
         this.options.push(option)
         this.$emit("new-option", this.options)
         this.newOption = ""
-        this.showAddInput = false; // Hide the input after adding an option
+        if (!this.firstInputDisplayed) {
+          this.firstInputDisplayed = true
+        }
       }
+    },
+    clearOptions() {
+      this.options = []
     },
     removeOption(index) {
       this.options.splice(index, 1)
@@ -57,9 +82,9 @@ export default {
       // Uncheck all other checkboxes
       this.options.forEach((option, index) => {
         if (index !== checkedIndex) {
-          option.correct = false;
+          option.correct = false
         }
-      });
+      })
     },
   },
 }
@@ -81,17 +106,18 @@ input[type="text"] {
   background-color: #4caf50;
   border: none;
   color: white;
-  padding: 15px 32px;
+  padding: 12px 28px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 16px;
+  /* font-size: 16px; */
   margin: 4px 2px;
   cursor: pointer;
+  border-radius: 8px;
 }
 .add {
-  background-color: white;
-  color: black;
-  border: 2px solid #4caf50;
+  background-color: #4caf50;
+  color: white;
+  border: 1px solid #4caf50;
 }
 </style>

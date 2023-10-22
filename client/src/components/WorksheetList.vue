@@ -1,40 +1,30 @@
 <template>
   <div class="worksheet-list">
     <h1 class="worksheet-list-title">Worksheet List</h1>
-    <table class="worksheet-table">
-      <thead>
-        <tr>
-          <th>Question</th>
-          <th>Answer</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="worksheet in worksheets" :key="worksheet._id">
-          <td>{{ worksheet.question }}</td>
-          <td>
-            <ul class="options-list">
-              <li v-for="(option, index) in worksheet.options" :key="index">
-                <div class="option">
-                  <span>{{ option.option }}</span>
-                  <span
-                    class="answer-label"
-                    :class="{ correct: option.correct }"
-                  >
-                    {{ option.correct ? "Correct" : "Incorrect" }}
-                  </span>
-                </div>
-              </li>
-            </ul>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-for="worksheet in worksheets" :key="worksheet._id" class="worksheet-item">
+      <div class="worksheet-question">
+        <strong>Question:</strong> {{ worksheet.question }}
+      </div>
+      <div class="worksheet-answers">
+        <strong>Answers:</strong>
+        <ul class="options-list">
+          <li v-for="(option, index) in worksheet.options" :key="index">
+            <div class="option">
+              <span>{{ option.option }}</span>
+              <span class="answer-label" :class="{ correct: option.correct }">
+                {{ option.correct ? "Correct" : "" }}
+              </span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-//   import axios from 'axios';
 import { mapState, mapActions } from "vuex"
+
 export default {
   props: ["newquestion"],
   data() {},
@@ -42,7 +32,7 @@ export default {
     newquestion(newVal) {
       if (newVal) {
         const newWorksheet = {
-          _id: "your_unique_id", 
+          _id: "your_unique_id",
           question: newVal.question,
           options: newVal.options,
         };
@@ -52,9 +42,6 @@ export default {
   },
   computed: {
     ...mapState(["worksheets"]),
-    //   getdata(){
-    //     return this.$store.state.worksheets
-    //   }
   },
   created() {
     this.fetchWorksheetsAction()
@@ -74,8 +61,8 @@ export default {
   transition: 0.3s;
   width: 40%;
   padding: 20px;
-  border-radius: 5px;
-  background-color: transparent;
+  border-radius: 65px;
+  background-color: black;
 }
 
 .worksheet-list-title {
@@ -84,24 +71,21 @@ export default {
   color: white;
 }
 
-.worksheet-table {
-  width: 100%;
-  border-collapse: collapse;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.worksheet-item {
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
   background-color: transparent;
 }
 
-.worksheet-table th,
-.worksheet-table td {
-  border: 1px solid transparent;
-  padding: 12px;
-  text-align: left;
+.worksheet-question {
+  font-weight: bold;
   color: white;
 }
 
-.worksheet-table th {
-  background-color: transparent;
-  font-weight: bold;
+.worksheet-answers {
+  margin-top: 10px;
+  color: white;
 }
 
 .options-list {

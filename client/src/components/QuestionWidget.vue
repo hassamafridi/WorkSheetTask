@@ -1,13 +1,17 @@
 <template>
   <div class="worksheet-form">
-    <h3>Worksheet Form</h3>
+    <h3 style="color: white;">Worksheet Question</h3>
     <textarea v-model="question" placeholder="Enter your question"></textarea>
-    <Form @new-option="handleNewOption"></Form>
+    <Form @new-option="handleNewOption" :option="options"></Form>
     <div class="button-container">
       <button @click="saveWorksheetAction" class="button primary">Save Worksheet</button>
     </div>
-    <div v-if="error" class="error-message">{{ error }}</div>
-    <div v-if="successMessage" class="notification success">{{ successMessage }}</div>
+    <div class="error-message-container" v-if="error" @transitionend="clearError">
+      <div class="error-message">{{ error }}</div>
+    </div>
+    <div class="error-message-container" v-if="successMessage" @transitionend="clearError">
+    <div  class="notification success">{{ successMessage }}</div>
+    </div>
   </div>
 </template>
 
@@ -25,6 +29,7 @@ export default {
       question: "",
       options: [],
       error: null,
+      successMessage: null,
     }
   },
   computed: {
@@ -37,27 +42,48 @@ export default {
     ...mapActions(["saveWorksheet"]),
 
     async saveWorksheetAction() {
-      if (this.question && this.options.length > 0 && this.atLeastOneCorrect) {
-        const questionData = {
-          question: this.question,
-          options: this.options,
-        };
-        this.$emit("new-question", questionData)
-        await this.saveWorksheet(questionData);
-        this.question = ''
-        this.options = []
-        alert("Successfully added question")
-      } else if (!this.question) {
-        this.error = "Please enter your question.";
-      } else if (this.options.length === 0) {
-        this.error = "Please add at least one option.";
-      } else {
-        this.error = "Please mark at least one option as correct.";
-      }
-    },
+  if (this.question && this.options.length >= 2 && this.atLeastOneCorrect) {
+    const questionData = {
+      question: this.question,
+      options: this.options,
+    };
+    this.$emit("new-question", questionData);
+    await this.saveWorksheet(questionData);
+    this.question = '';
+    this.options = [];
+    this.successMessage = "Successfully added question";
+    this.clearSuccessMessageAfterDelay(); 
+    this.clearErrorAfterDelay();
+  } else if (!this.question) {
+    this.error = "Please enter your question.";
+    this.clearErrorAfterDelay();
+  } else if (this.options.length < 2) {
+    this.error = "Please add at least two options.";
+    this.clearErrorAfterDelay();
+  } else if (!this.atLeastOneCorrect) {
+    this.error = "Please mark at least one option as correct.";
+    this.clearErrorAfterDelay();
+  }
+},
     handleNewOption(newOptions) {
-      this.options = newOptions
+      this.options = newOptions;
     },
+    clearErrorAfterDelay() {
+      setTimeout(() => {
+        this.error = null;
+      }, 2000); // Adjust the time delay as needed
+    },
+    clearError() {
+      this.error = null;
+    },
+    clearSuccessMessage() {
+    this.successMessage = null;
+  },
+  clearSuccessMessageAfterDelay() {
+  setTimeout(() => {
+    this.successMessage = null;
+  }, 2000); // Adjust the time delay as needed
+},
   },
 }
 </script>
@@ -65,11 +91,12 @@ export default {
 <style scoped>
 .worksheet-form {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  transition: 0.3s;
-  width: 40%;
-  padding: 20px;
-  border-radius: 5px;
-  background-color: transparent;
+    transition: 0.3s;
+    width: 40%;
+    padding: 20px;
+    border-radius: 68px;
+    background-color: black;
+    height: fit-content;
 }
 
 textarea {
@@ -99,8 +126,24 @@ textarea {
 .success {
   background-color: green;
   color: white;
+  text-align: center;
+  border: 2px solid;
+padding: 10px;
+}
+.error-message-container {
+  transition: all 0.5s ease;
+  display: flex;
+  justify-content: center;
 }
 
+.error-message {
+  border: 2px solid;
+  color: #f44336;
+  margin-top: 10px;
+  padding: 10px;
+  text-align: center;
+  border-radius: 5px;
+}
 .error {
   background-color: red;
   color: white;
@@ -121,7 +164,10 @@ textarea {
 }
 
 .error-message {
-  color: #f44336;
-  margin-top: 10px;
+  border: 2px solid;
+    color: #f44336;
+    margin-top: 10px;
+    padding: 10px;
+    text-align: center;
 }
 </style>
